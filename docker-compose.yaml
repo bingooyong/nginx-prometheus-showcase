@@ -1,0 +1,25 @@
+services:
+    httpservice:
+        image: ranadeeppolavarapu/nginx-http3
+        volumes:
+            - "./nginx.conf:/etc/nginx/nginx.conf"
+            - "./status.conf:/etc/nginx/conf.d/status.conf"
+        ports:
+            - "8080:8080"
+    grafana:
+        image: grafana/grafana
+        ports:
+            - "3000:3000"
+    exporter:
+        image: nginx/nginx-prometheus-exporter:0.8.0
+        command: -nginx.scrape-uri http://httpservice:8080/stub_status
+        ports:
+            - "9113:9113"
+        depends_on:
+            - httpservice           
+    prometheus:
+        image: prom/prometheus
+        volumes:
+            - "./prometheus.yml:/etc/prometheus/prometheus.yml"
+        ports:
+            - "9090:9090"
